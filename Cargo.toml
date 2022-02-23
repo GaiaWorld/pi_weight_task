@@ -1,0 +1,17 @@
+[package]
+name = "pi_weight_task"
+version = "0.1.0"
+authors = ["suncy <suncy@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+pi_wheel = {path="../pi_wheel"}
+pi_timer = {path="../pi_timer"}
+pi_cancel_timer = {path="../pi_cancel_timer"}
+pi_ext_heap = {path="../pi_ext_heap"}
+slotmap = "1.0"
+pi_slot_wheel = {path="../pi_slot_wheel"}
+pi_slot_deque = {path="../pi_slot_deque"}
+pi_weight = {path="../pi_weight"}
+pi_wy_rng = {path="../pi_wy_rng"}
+rand_core = "0.6"
