@@ -12,13 +12,12 @@
 //!         定时任务分为可撤销和不可撤销两类，可撤销的定时任务放入时会返回唯一key，通过该key可撤销该任务。
 //!
 
-use std::{collections::VecDeque, fmt, num::NonZeroU32};
-
-use ext_heap::empty;
+use pi_ext_heap::empty;
+use pi_weight::{WeightHeap, WeightItem};
+use pi_wy_rng::WyRng;
 use rand_core::{RngCore, SeedableRng};
 use slotmap::{new_key_type, Key, SlotMap};
-use weight::{WeightHeap, WeightItem};
-use wy_rng::WyRng;
+use std::{collections::VecDeque, fmt, num::NonZeroU32};
 
 // 定义队列键类型
 new_key_type! {
@@ -111,9 +110,9 @@ pub struct TaskPool<T, D, const N0: usize, const N: usize, const L: usize> {
     // 并行任务池
     async_pool: WeightHeap<T>,
     // 不可撤销定时器
-    timer: timer::Timer<T, N0, N, L>,
+    timer: pi_timer::Timer<T, N0, N, L>,
     // 可撤销定时器
-    cancel_timer: cancel_timer::Timer<T, N0, N, L>,
+    cancel_timer: pi_cancel_timer::Timer<T, N0, N, L>,
     // 两个定时器的权重
     timer_weight: usize,
     // 随机数
@@ -356,19 +355,19 @@ impl<T, D, const N0: usize, const N: usize, const L: usize> TaskPool<T, D, N0, N
         self.async_add_count += 1;
     }
     /// 获得不可删除的定时器
-    pub fn get_timer(&self) -> &timer::Timer<T, N0, N, L> {
+    pub fn get_timer(&self) -> &pi_timer::Timer<T, N0, N, L> {
         &self.timer
     }
     /// 获得可删除的定时器
-    pub fn get_cancel_timer(&self) -> &cancel_timer::Timer<T, N0, N, L> {
+    pub fn get_cancel_timer(&self) -> &pi_cancel_timer::Timer<T, N0, N, L> {
         &self.cancel_timer
     }
     /// 获得不可删除的定时器
-    pub fn get_timer_mut(&mut self) -> &mut timer::Timer<T, N0, N, L> {
+    pub fn get_timer_mut(&mut self) -> &mut pi_timer::Timer<T, N0, N, L> {
         &mut self.timer
     }
     /// 获得可删除的定时器
-    pub fn get_cancel_timer_mut(&mut self) -> &mut cancel_timer::Timer<T, N0, N, L> {
+    pub fn get_cancel_timer_mut(&mut self) -> &mut pi_cancel_timer::Timer<T, N0, N, L> {
         &mut self.cancel_timer
     }
     /// 获得定时器的权重

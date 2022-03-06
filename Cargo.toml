@@ -2,16 +2,20 @@
 name = "pi_weight_task"
 version = "0.1.0"
 authors = ["suncy <suncy@gmail.com>"]
-edition = "2018"
+edition = "2021"
+description = "任务池"
+repository = "https://github.com/GaiaWorld/pi_weight_task"
+license = "MIT OR Apache-2.0"
+keywords = ["pi",  "task"]
 
 [dependencies]
-pi_wheel = {path="../pi_wheel"}
-pi_timer = {path="../pi_timer"}
-pi_cancel_timer = {path="../pi_cancel_timer"}
-pi_ext_heap = {path="../pi_ext_heap"}
+pi_wheel = "0.1"
+pi_timer = "0.1"
+pi_cancel_timer = "0.1"
+pi_ext_heap = "0.1"
 slotmap = "1.0"
-pi_slot_wheel = {path="../pi_slot_wheel"}
-pi_slot_deque = {path="../pi_slot_deque"}
-pi_weight = {path="../pi_weight"}
-pi_wy_rng = {path="../pi_wy_rng"}
+pi_slot_wheel = "0.1"
+pi_slot_deque = "0.1"
+pi_weight = "0.1"
+pi_wy_rng = "0.1"
 rand_core = "0.6"
