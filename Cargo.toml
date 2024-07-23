@@ -1,6 +1,6 @@
 [package]
 name = "pi_weight_task"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["suncy <suncy@gmail.com>"]
 edition = "2021"
 description = "任务池"
@@ -11,11 +11,11 @@ keywords = ["pi",  "task"]
 [dependencies]
 pi_wheel = "0.1"
 pi_timer = "0.1"
-pi_cancel_timer = "0.1"
+pi_cancel_timer = "0.2"
 pi_ext_heap = "0.1"
 slotmap = "1.0"
-pi_slot_wheel = "0.1"
-pi_slot_deque = "0.1"
+pi_slot_wheel = "0.2"
+pi_slot_deque = "0.2"
 pi_weight = "0.1"
 pi_wy_rng = "0.1"
 rand_core = "0.6"
