@@ -371,10 +371,12 @@ impl<T, D, const N0: usize, const N: usize, const L: usize> TaskPool<T, D, N0, N
         &mut self.cancel_timer
     }
     /// 获得定时器的权重
+    #[deprecated]
     pub fn get_timer_weight(&self) -> usize {
         self.timer_weight
     }
     /// 设置定时器的权重
+    #[deprecated]
     pub fn set_timer_weight(&mut self, weight: usize) {
         self.timer_weight = weight;
     }
@@ -392,13 +394,19 @@ impl<T, D, const N0: usize, const N: usize, const L: usize> TaskPool<T, D, N0, N
         } else {
             0
         };
-        let timer_w = if self.timer.is_ok(now) {
-            self.timer_weight as u64
+        // 定时器中任务权重总是占总权重的一半
+        let mut cancel_timer_w = if self.cancel_timer.is_ok(now) {
+            sync_w + async_w + 2
         } else {
             0
         };
-        let cancel_timer_w = if self.cancel_timer.is_ok(now) {
-            self.timer_weight as u64
+        let timer_w = if self.timer.is_ok(now) {
+            if cancel_timer_w > 0 {
+                cancel_timer_w = cancel_timer_w >> 1;
+                cancel_timer_w
+            } else {
+                sync_w + async_w
+            }
         } else {
             0
         };
@@ -417,6 +425,56 @@ impl<T, D, const N0: usize, const N: usize, const L: usize> TaskPool<T, D, N0, N
         } else {
             w -= timer_w;
         }
+        if w < async_w {
+            if let Some(r) = self.async_pool.pop(&mut (), empty) {
+                self.async_remove_count += 1;
+                return (Some(r.el), DequeKey::null());
+            }
+        } else {
+            w -= async_w;
+        }
+        // 从串行任务队列的权重堆中根据权重查找队列
+        let index = self.sync_pool.find_weight(w as usize);
+        let key = self.sync_pool.as_slice()[index].el;
+        let it = &mut self.slot[key];
+        // 弹出任务
+        let r = it.deque.pop_front();
+        self.sync_remove_count += 1;
+        if it.lock_state.is_some() {
+            // 如果队列为自动锁定状态，则改为锁定， 并移出权重堆
+            it.lock_state = Some(true);
+            self.sync_pool
+                .remove_index(index, &mut self.slot, set_index);
+        } else if it.deque.is_empty() {
+            // 如果队列为空，则移出权重堆
+            self.sync_pool
+                .remove_index(index, &mut self.slot, set_index);
+        } else if let WeightType::Unit(uw) = it.weight_type {
+            // 如果队列权重类型为单位权重，则调整队列在权重堆上的权重
+            let ww = (uw.get() as usize) * it.deque.len();
+            self.sync_pool
+                .modify_weight(index, ww, &mut self.slot, set_index);
+        }
+        (r, key)
+    }
+
+    /// 弹出一个任务（忽略定时器的任务）
+    pub fn pop_ignore_timer(&mut self) -> (Option<T>, DequeKey) {
+        let sync_w = if let Some(r) = self.sync_pool.peek() {
+            r.amount() as u64
+        } else {
+            0
+        };
+        let async_w = if let Some(r) = self.async_pool.peek() {
+            r.amount() as u64
+        } else {
+            0
+        };
+        let amount = sync_w + async_w;
+        if amount == 0 {
+            return (None, DequeKey::null());
+        }
+        let mut w = self.rng.next_u64() % amount;
         if w < async_w {
             if let Some(r) = self.async_pool.pop(&mut (), empty) {
                 self.async_remove_count += 1;
