@@ -1,6 +1,6 @@
 [package]
 name = "pi_weight_task"
-version = "0.2.1"
+version = "0.2.2"
 authors = ["suncy <suncy@gmail.com>"]
 edition = "2021"
 description = "任务池"

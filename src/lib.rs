@@ -405,7 +405,7 @@ impl<T, D, const N0: usize, const N: usize, const L: usize> TaskPool<T, D, N0, N
                 cancel_timer_w = cancel_timer_w >> 1;
                 cancel_timer_w
             } else {
-                sync_w + async_w
+                sync_w + async_w + 1
             }
         } else {
             0
